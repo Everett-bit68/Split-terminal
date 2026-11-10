@@ -83,3 +83,6 @@ body{
 .text-warn{
     color: var(--beta-color);
 }
+.pane-alpha .title-player{
+    background-color: var(--alpha-color); box-shadow: 0 0 10px var(--alpha-color);
+}

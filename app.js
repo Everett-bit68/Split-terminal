@@ -15,8 +15,9 @@ const ROOM_DATA = {
         [1,1,1,1,1,1,1,1],
         [1,0,0,4,0,0,0,1],
         [1,0,1,1,0,1,0,1],
-        [1,0,0,0,0,1,0,1],
+        [1,0,1,0,0,1,0,1],
         [1,0,4,0,1,1,0,1],
+        [1,0,1,0,0,0,0,1],
         [1,0,0,0,1,0,0,1],
         [1,1,1,1,1,1,1,1]
     ]
@@ -33,7 +34,7 @@ function renderGrids(){
     for (let y = 0; y<ROOM_DATA.size; y++){
         for (let x = 0; x < ROOM_DATA.size; x++){
             const cellAlpha = document.createElement("div");
-            cellAlpha.classList.add("tile");
+            cellAlpha.classList.add("title");
             if (ROOM_DATA.alphaMap[y][x] === 1) cellAlpha.classList.add("wall");
             if (ROOM_DATA.alphaMap[y][x] === 9) cellAlpha.classList.add("exit");
             if (playerPos.x === x && playerPos.y === y) cellAlpha.classList.add("player");
