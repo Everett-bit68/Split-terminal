@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split terminal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>SPLIT TERMINAL</h1>
+        <div id="room-title">ROOM 01: SYNC_TEST</div>
+    </header>
+    <main class="split-viewport">
+        <section class="pane pane-alpha">
+            <div class="pane-bar">SECTOR ALPHA: PHYSICAL LAYER</div>
+            <div class="grid-wrapper">
+                <div id="grid-alpha" class="grid"></div>
+            </div>
+        </section>
+        <div class="pane-divider"></div>
+        <section class="pane pane-beta">
+            <div class="pane-bar">SECTOR BETA: ANOMALY LAYER</div>
+            <div class="grid-wrapper">
+                <div id="grid-beta" class="grid"></div>
+            </div>
+        </section>
+    </main>
+    <footer class="control-footer">
+        <div class="status-box">
+            <span>SYSTEM STATUS: <strong id="sys-status" class="text-good">SYNCHRONIZED</strong></span>
+            <span>DESYNC PENALIES: <strong id="desync-count">0</strong></span>
+        </div>
+        <div class="instruction-box">
+            <span>NAVIGATE: [W/A/S/D] or [ARROWS]</span>
+            <span>RESTART LEVEL [R]</span>
+        </div>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
