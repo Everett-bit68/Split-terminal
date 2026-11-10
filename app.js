@@ -23,6 +23,8 @@ const ROOM_DATA = {
     ]
 };
 let playerPos = { x:1, y:1};
+let activeControl = "BOTH";
+let exitUnlocked = false;
 let desyncCount = 0;
 const gridAlphaEl = document.getElementById("grid-alpha");
 const gridBetaEl = document.getElementById("grid-beta");
@@ -31,46 +33,73 @@ const desyncEl = document.getElementById("desync-count");
 function renderGrids(){
     gridAlphaEl.innerHTML ="";
     gridBetaEl.innerHTML = "";
+    const alphaOnPlate = ROOM_DATA.alphaMap[alphaPos.y][alphaPos.x] === 5;
+    const betaOnPlate = ROOM_DATA.betaMap[betaPos.y][betaPos.x] === 5;
+    exitUnlocked = alphaOnPlate || betaOnPlate;
     for (let y = 0; y<ROOM_DATA.size; y++){
         for (let x = 0; x < ROOM_DATA.size; x++){
             const cellAlpha = document.createElement("div");
             cellAlpha.classList.add("title");
-            if (ROOM_DATA.alphaMap[y][x] === 1) cellAlpha.classList.add("wall");
-            if (ROOM_DATA.alphaMap[y][x] === 9) cellAlpha.classList.add("exit");
-            if (playerPos.x === x && playerPos.y === y) cellAlpha.classList.add("player");
+            const aVal= ROOM_DATA.alphaMap[y][x];
+            if (aVal === 1) cellAlpha.classList.add("wall");
+            if (aVal === 5) cellAlpha.classList.add("plate");
+            if (aVal === 7) cellAlpha.classList.add("swap");
+            if (aVal === 9){
+                cellAlpha.classList.add("exit");
+                if (exitUnlocked) cellAlpha.classList.add("unlocked");
+            }
+            if (alphaPos.x === x && alphaPos.y === y) cellAlpha.classList.add("player");
             gridAlphaEl.appendChild(cellAlpha);
             const cellBeta = document.createElement("div");
             cellBeta.classList.add("title");
-            if (ROOM_DATA.betaMap[y][x] === 1) cellBeta.classList.add("wall");
-            if (ROOM_DATA.betaMap[y][x] === 4) cellBeta.classList.add("hazard");
-            if (playerPos.x === x && playerPos.y === y) cellBeta.classList.add("player");
+            const bVal = ROOM_DATA.betaMap[y][x];
+            if (bVal === 1) cellBeta.classList.add("wall");
+            if (bVal === 4) cellBeta.classList.add("hazard");
+            if (bVal === 5) cellBeta.classList.add("plate");
+            if (bVal === 7) cellBeta.classList.add("swap");
+            if (betaPos.x === x && betaPos.y === y) cellBeta.classList.add("player");
             gridBetaEl.appendChild(cellBeta);
         }
     }
 }
 function movePlayer(dx,dy){
-    const newX = playerPos.x + dx;
-    const newY = playerPos.y + dy;
-    const alphaTile = ROOM_DATA.alphaMap[newY][newX];
-    const betaTile = ROOM_DATA.betaMap[newY][newX];
-    if (alphaTile === 1 || betaTile === 1){
-        triggerDesync("DESYNC: WALL DESTRUCTION");
+    let nextAlpha = {...alphaPos};
+    let nextBeta = {...betaPos};
+    if (activeControl === "BOTH"|| activeControl === "ALPHA"){
+        nextAlpha.x += dx;
+        nextAlpha.y +=dy;
+    }
+    if (activeControl === "BOTH"|| activeControl === "BETA"){
+        nextBeta.x += dx;
+        nextAlpha.y += dy;
+    }
+    const aTile = ROOM_DATA.alphaMap[nextAlpha.y][nextAlpha.x];
+    const bTile = ROOM_DATA.betaMap[nextBeta.y][nextBeta.x];
+    if ((activeControl!=="BETA" && aTile ===1)||(activeControl !== "ALPHA" && bTile ===1)){
+        triggerDesync("DESYNC: WALL OBSTRUCTION");
         return;
     }
-    if (betaTile === 4){
+    if (bTile === 4 && (activeControl === "BOTH"||activeControl === "BETA")){
         triggerDesync("DESYNC: HAZARD BREACH");
-        playerPos = {x:1,y:1};
-        renderGrids();
+        resetPositions();
         return;
     }
-    playerPos.x = newX;
-    playerPos.y = newY;
-    statusEl.textContent = "SYNCHRONIZED";
+    alphaPos = nextAlpha;
+    betaPos = mextBeta;
+    if (aTile === 7||bTile === 7){
+        cycleControlFocus();
+    }
+    statusEl.textContent = `MODE: ${activeControl} CONTROL`;
     statusEl.className = "text-good";
     renderGrids();
-    if (alphaTile === 9){
-        setTimeout(()=> alert("SECTOR CLEANED | ESCAPE SUCCESSFUL"),50);
+    if (aTile === 9 && exitUnlocked){
+        setTimeout(()=> alert("SECTOR CLEARED: ESCAPE SUCCESSFUL"),50);
     }
+}
+function cycleControlFocus(){
+    if (activeControl === "BOTH") activeControl = "ALPHA";
+    else if (activeControl === "ALPHA") activeControl = "BETA";
+    else activeControl = "BOTH"
 }
 function triggerDesync(msg){
     desyncCount++;
@@ -78,12 +107,24 @@ function triggerDesync(msg){
     statusEl.textContent = msg;
     statusEl.className = "text-warn";
 }
+function resetPositions(){
+    alphaPos = {x:1,y:1};
+    betaPos = {x:1,y:1};
+    activeControl = "BOTH";
+    renderGrids();
+}
 window.addEventListener("keydown",(e)=>{
     switch (e.key.toLowerCase()){
         case "w": case "arrowup": movePlayer(0,-1); break;
         case "s": case "arrowdown": movePlayer(0,1); break;
         case "a": case "arrowleft": movePlayer(-1,0); break;
         case "d": case "arrowright": movePlayer(1,0); break;
+        case "tab":
+            e.preventDefault();
+            cycleControlFocus();
+            statusEl.textContent = `MANUAL FOCUS: ${activeControl}`;
+            renderGrids();
+            break;
         case "r":
             playerPos = {x:1,y:1};
             renderGrids();
