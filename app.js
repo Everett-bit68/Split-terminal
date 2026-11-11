@@ -27,6 +27,7 @@ let betaPos = {x:1,y:1};
 let activeControl = "BOTH";
 let exitUnlocked = false;
 let desyncCount = 0;
+let audioCtx = null;
 const gridAlphaEl = document.getElementById("grid-alpha");
 const gridBetaEl = document.getElementById("grid-beta");
 const statusEl = document.getElementById("sys-status");
@@ -131,4 +132,54 @@ window.addEventListener("keydown",(e)=>{
             break;
     }
 });
+function initAudio(){
+    if (!audioCtx){
+        audioCtx = new (window.AudioContext|| window.webkitAudioContext)();
+    }
+}
+function playSound(type){
+    initAudio();
+    if (!audioCtx) return;
+    const osc=audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const now = audioCtx.currentTime;
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    if (type === "move"){
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(440,now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.05);
+        gainNode.gain.setValueAtTime(0.05,now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+    }
+    else if(type === "wall"){
+        osc.type="sawtooth";
+        osc.frequency.setValueAtTime(120,now);
+        osc.frequeny.linearRampToValue(40, now + 0.1);
+        gainNode.gain.setValueAtTime(0.1,now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    }
+    else if (type==="hazard"|| type==="desync"){
+        osc.type="square";
+        osc.frequency.setValueAtTime(150,now);
+        osc.frequency.setValueAtTime(300, now + 0.08);
+        gainNode.gain.setValueAtTime(0.12,now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+    }
+    else if (type === "unlock"){
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(587, now);
+        osc.frequency.setValueAtTime(880, now + 0.1);
+        gainNode.gain.setValueAtTime(0.08,now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+    }
+}
 renderGrids();
