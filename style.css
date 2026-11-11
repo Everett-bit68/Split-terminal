@@ -86,13 +86,13 @@ body{
 .pane-alpha .title.player{
     background-color: var(--alpha-color); box-shadow: 0 0 10px var(--alpha-color);
 }
-.title-plate{
+.title.plate{
     background-color: #1a1e00; border: 1px solid #aaff00;
 }
-.title-plate::after{
+.title.plate::after{
     content: "⎍"; color: #aaff00;
 }
-.title-swap{
+.title.swap{
     background-color: #001a1e; border: 1px dashed #00e5ff;
 }
 .title.swap::after{

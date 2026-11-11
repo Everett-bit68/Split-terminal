@@ -22,7 +22,8 @@ const ROOM_DATA = {
         [1,1,1,1,1,1,1,1]
     ]
 };
-let playerPos = { x:1, y:1};
+let alphaPos = {x:1,y:1};
+let betaPos = {x:1,y:1};
 let activeControl = "BOTH";
 let exitUnlocked = false;
 let desyncCount = 0;
@@ -71,7 +72,7 @@ function movePlayer(dx,dy){
     }
     if (activeControl === "BOTH"|| activeControl === "BETA"){
         nextBeta.x += dx;
-        nextAlpha.y += dy;
+        nextBeta.y += dy;
     }
     const aTile = ROOM_DATA.alphaMap[nextAlpha.y][nextAlpha.x];
     const bTile = ROOM_DATA.betaMap[nextBeta.y][nextBeta.x];
@@ -85,7 +86,7 @@ function movePlayer(dx,dy){
         return;
     }
     alphaPos = nextAlpha;
-    betaPos = mextBeta;
+    betaPos = nextBeta;
     if (aTile === 7||bTile === 7){
         cycleControlFocus();
     }
@@ -126,8 +127,7 @@ window.addEventListener("keydown",(e)=>{
             renderGrids();
             break;
         case "r":
-            playerPos = {x:1,y:1};
-            renderGrids();
+            resetPositions();
             break;
     }
 });
