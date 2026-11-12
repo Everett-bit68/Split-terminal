@@ -61,12 +61,18 @@ function renderGrids(){
             if (bVal === 7) cellBeta.classList.add("swap");
             if (betaPos.x === x && betaPos.y === y) cellBeta.classList.add("player");
             gridBetaEl.appendChild(cellBeta);
+            const newlyUnlocked = !exitUnlocked && (alphaOnPlate || betaOnPlate);
+            exitUnlocked = alphaOnPlate || betaOnPlate;
+            if (newlyUnlocked){
+                playSound("unlock");
+            }
         }
     }
 }
 function movePlayer(dx,dy){
     let nextAlpha = {...alphaPos};
     let nextBeta = {...betaPos};
+    playSound("move");
     if (activeControl === "BOTH"|| activeControl === "ALPHA"){
         nextAlpha.x += dx;
         nextAlpha.y +=dy;
@@ -78,6 +84,7 @@ function movePlayer(dx,dy){
     const aTile = ROOM_DATA.alphaMap[nextAlpha.y][nextAlpha.x];
     const bTile = ROOM_DATA.betaMap[nextBeta.y][nextBeta.x];
     if ((activeControl!=="BETA" && aTile ===1)||(activeControl !== "ALPHA" && bTile ===1)){
+        playSound("wall");
         triggerDesync("DESYNC: WALL OBSTRUCTION");
         return;
     }
