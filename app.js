@@ -104,7 +104,8 @@ function movePlayer(dx,dy){
     statusEl.textContent = `MODE: ${activeControl} CONTROL`;
     statusEl.className = "text-good";
     renderGrids();
-    if (aTile === 9 && exitUnlocked){
+    if ((aTile === 9 || bTile === 9) && exitUnlocked){
+        playSound("unlock");
         setTimeout(()=> alert("SECTOR CLEARED: ESCAPE SUCCESSFUL"),50);
     }
 }
