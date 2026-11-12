@@ -56,12 +56,6 @@ body{
 .title.wall{
     background-color: var(--wall-color); border: 1px solid #2d3748;
 }
-.pane-alpha .title.exit{
-    border: 2px dashed #555; color: #555;
-}
-.pane-alpha .title.exit::after{
-    content: "LOCKED";
-}
 .pane-beta .title.player{
     background-color: var(--beta-color); box-shadow: 0 0 10px var(--beta-color);
 }
@@ -103,4 +97,18 @@ body{
 }
 .pane-alpha .title.exit.unlocked::after{
     content: "OPEN";
+}
+.pane-alpha .title.exit,
+.pane-beta .title.exit{
+    border: 2px dashed #555;color: #555;
+}
+.pane-beta .title.exit.unlocked{
+    border: 2px solid(--beta-color); color: var(--beta-color); box-shadow: 0 0 8px var(--beta-color);
+}
+.pane-beta .title.exit.unlocked::after{
+    content: "OPEN";
+}
+.pane-alpha .title.exit::after,
+.pane-beta .title.exit::after{
+    content: "LOCKED";
 }

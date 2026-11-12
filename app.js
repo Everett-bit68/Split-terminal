@@ -18,7 +18,7 @@ const ROOM_DATA = {
         [1,0,1,0,0,1,0,1],
         [1,0,4,0,1,1,0,1],
         [1,0,1,0,0,0,0,1],
-        [1,0,0,0,1,0,0,1],
+        [1,0,0,0,1,0,9,1],
         [1,1,1,1,1,1,1,1]
     ]
 };
@@ -37,7 +37,11 @@ function renderGrids(){
     gridBetaEl.innerHTML = "";
     const alphaOnPlate = ROOM_DATA.alphaMap[alphaPos.y][alphaPos.x] === 5;
     const betaOnPlate = ROOM_DATA.betaMap[betaPos.y][betaPos.x] === 5;
+    const prevUnlocked = exitUnlocked;
     exitUnlocked = alphaOnPlate || betaOnPlate;
+    if (!prevUnlocked && exitUnlocked){
+        playSound("unlock");
+    }
     for (let y = 0; y<ROOM_DATA.size; y++){
         for (let x = 0; x < ROOM_DATA.size; x++){
             const cellAlpha = document.createElement("div");
@@ -59,13 +63,12 @@ function renderGrids(){
             if (bVal === 4) cellBeta.classList.add("hazard");
             if (bVal === 5) cellBeta.classList.add("plate");
             if (bVal === 7) cellBeta.classList.add("swap");
+            if (bVal === 9) {
+                cellBeta.classList.add("exit");
+                if (exitUnlocked) cellBeta.classList.add("unlocked");
+            }
             if (betaPos.x === x && betaPos.y === y) cellBeta.classList.add("player");
             gridBetaEl.appendChild(cellBeta);
-            const newlyUnlocked = !exitUnlocked && (alphaOnPlate || betaOnPlate);
-            exitUnlocked = alphaOnPlate || betaOnPlate;
-            if (newlyUnlocked){
-                playSound("unlock");
-            }
         }
     }
 }
@@ -164,7 +167,7 @@ function playSound(type){
     else if(type === "wall"){
         osc.type="sawtooth";
         osc.frequency.setValueAtTime(120,now);
-        osc.frequeny.linearRampToValue(40, now + 0.1);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.1);
         gainNode.gain.setValueAtTime(0.1,now);
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
         osc.start(now);
