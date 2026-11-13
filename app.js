@@ -193,4 +193,19 @@ function playSound(type){
         osc.stop(now + 0.25);
     }
 }
+function showDebrief(){
+    levelCleared = true;
+    playSound ("unlock");
+    const elapsedSec = Math.floor((Date.now()-startTime)/1000);
+    const mins = String(Math.floor(elapsedSec/60)).padStart(2, "0");
+    const secs = String(elapsedSec % 60).padStart(2,"0");
+    let rank = "S-RANK";
+    if (desyncCount > 3) rank = "B-RANK";
+    else if (desyncCount > 0 || moveCount > 35) rank = "A-RANK";
+    document.getElementById("final-moves").textContent = moveCount;
+    document.getElementById("final-desyncs").textContent = desyncCount;
+    document.getElementById("final-time").textContent = `${mins}:${secs}`;
+    document.getElementById("final-rank").textContent = rank;
+    debriefModal.classList.remove("hidden");
+}
 renderGrids();

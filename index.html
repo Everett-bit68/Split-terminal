@@ -37,6 +37,35 @@
             <span>RESTART LEVEL [R]</span>
         </div>
     </footer>
+    <div id="debrief-modal" class="modal-backdrop hidden">
+        <div class="debrief-box">
+            <div class="debrief-header">
+                <span>TRANSMISSION COMPLETE</span>
+                <span class="badge-ok">STATUS: CLEARED</span>
+            </div>
+            <h2>SECTOR ESCAPE VERIFIED</h2>
+            <p class="debrief-sub">Synchronization protocols held across both dimentional layers</p>
+            <div class="telemetry-grid">
+                <div class="telemetry-item">
+                    <span class="t-label">TOTAL CYCLES (MOVES)</span>
+                    <span id="final-moves" class="t-value">0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="t-label">DESYNC PENALTIES</span>
+                    <span id="final-desyncs" class="t-value text-warn">0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="t-label">ELAPSED TIME</span>
+                    <span id="final-time" class="t-value">00:00</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="t-label">SYNC RATING</span>
+                    <span id="final-rank" class="t-value text-good">S-RANK</span>
+                </div>
+            </div>
+            <button id="reboot-btn" class="terminal-btn">[REBOOT SYSTEM / PLAY AGAIN]</button>
+        </div>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
