@@ -226,5 +226,15 @@ function showDebrief(){
     document.getElementById("final-rank").textContent = rank;
     debriefModal.classList.remove("hidden");
 }
+const crtToggleBtn = document.getElementById("crt-toggle-btn");
+let crtEnabled = true;
+if (crtToggleBtn){
+    crtToggleBtn.addEventListener("click",()=>{
+        crtEnabled = !crtEnabled;
+        document.body.classList.toggle("crt-disabled",!crtEnabled);
+        crtToggleBtn.textContent = crtEnabled ? "[CRT: ON]" : "[CRT: OFF]";
+        playSound("move");
+    });
+}
 document.getElementById("reboot-btn").addEventListener("click",() => resetPositions(true));
 renderGrids();
