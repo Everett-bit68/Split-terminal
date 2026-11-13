@@ -28,10 +28,15 @@ let activeControl = "BOTH";
 let exitUnlocked = false;
 let desyncCount = 0;
 let audioCtx = null;
+let moveCount = 0;
+let startTime = Date.now();
+let levelCleared = false;
 const gridAlphaEl = document.getElementById("grid-alpha");
 const gridBetaEl = document.getElementById("grid-beta");
 const statusEl = document.getElementById("sys-status");
 const desyncEl = document.getElementById("desync-count");
+const debriefModal = document.getElementById("debrief-modal");
+const rebootBtn = document.getElementById("reboot-btn");
 function renderGrids(){
     gridAlphaEl.innerHTML ="";
     gridBetaEl.innerHTML = "";
@@ -98,6 +103,7 @@ function movePlayer(dx,dy){
     }
     alphaPos = nextAlpha;
     betaPos = nextBeta;
+    moveCount++;
     if (aTile === 7||bTile === 7){
         cycleControlFocus();
     }
@@ -105,6 +111,7 @@ function movePlayer(dx,dy){
     statusEl.className = "text-good";
     renderGrids();
     if ((aTile === 9 || bTile === 9) && exitUnlocked){
+        showDebrief();
         playSound("unlock");
         setTimeout(()=> alert("SECTOR CLEARED: ESCAPE SUCCESSFUL"),50);
     }
