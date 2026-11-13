@@ -103,7 +103,7 @@ body{
     border: 2px dashed #555;color: #555;
 }
 .pane-beta .title.exit.unlocked{
-    border: 2px solid(--beta-color); color: var(--beta-color); box-shadow: 0 0 8px var(--beta-color);
+    border: 2px solid var(--beta-color); color: var(--beta-color); box-shadow: 0 0 8px var(--beta-color);
 }
 .pane-beta .title.exit.unlocked::after{
     content: "OPEN";

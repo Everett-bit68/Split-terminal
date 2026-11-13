@@ -127,11 +127,22 @@ function triggerDesync(msg){
     statusEl.textContent = msg;
     statusEl.className = "text-warn";
 }
-function resetPositions(){
+function resetPositions(fullReset = false){
     alphaPos = {x:1,y:1};
     betaPos = {x:1,y:1};
     activeControl = "BOTH";
     renderGrids();
+    if (fullReset){
+        moveCount = 0;
+        desyncCount = 0;
+        startTime = Date.now();
+        levelCleared = false;
+        desyncEl.textContent = "0";
+        statusEl.textContent = "SYNCHRONIZED";
+        statusEl.className= "text-good";
+        const modal = document.getElementById("debrief-modal");
+        if (modal) modal.classList.add("hidden");
+    }
 }
 window.addEventListener("keydown",(e)=>{
     switch (e.key.toLowerCase()){
@@ -215,4 +226,5 @@ function showDebrief(){
     document.getElementById("final-rank").textContent = rank;
     debriefModal.classList.remove("hidden");
 }
+document.getElementById("reboot-btn").addEventListener("click",() => resetPositions(true));
 renderGrids();
