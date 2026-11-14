@@ -112,6 +112,9 @@ function renderGrids(){
 function movePlayer(dx,dy){
     let nextAlpha = {...alphaPos};
     let nextBeta = {...betaPos};
+    const currentRoom = ROOM_DATA[currentLevelIndex];
+    const prevATile = currentRoom.alphaMap[alphaPos.y][alphaPos.x];
+    const prevBTile = currentRoom.alphaMap[betaPos.y][betaPos.x];
     playSound("move");
     if (activeControl === "BOTH"|| activeControl === "ALPHA"){
         nextAlpha.x += dx;
@@ -121,7 +124,6 @@ function movePlayer(dx,dy){
         nextBeta.x += dx;
         nextBeta.y += dy;
     }
-    const currentRoom = ROOM_DATA[currentLevelIndex];
     const aTile = currentRoom.alphaMap[nextAlpha.y][nextAlpha.x];
     const bTile = currentRoom.betaMap[nextBeta.y][nextBeta.x];
     if ((activeControl!=="BETA" && aTile ===1)||(activeControl !== "ALPHA" && bTile ===1)){
@@ -138,7 +140,9 @@ function movePlayer(dx,dy){
     alphaPos = nextAlpha;
     betaPos = nextBeta;
     moveCount++;
-    if (aTile === 7||bTile === 7){
+    const justSteppedOnAlphaSwap = (prevATile !== 7 && aTile === 7);
+    const justSteppedOnBetaSwap = (prevBTile !== 7 && bTile === 7); 
+    if (justSteppedOnAlphaSwap || justSteppedOnBetaSwap){
         cycleControlFocus();
         playSound("unlock");
     }
