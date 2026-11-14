@@ -1,27 +1,54 @@
-const ROOM_DATA = {
-    title: "ROOM 01: SYNC TEST",
-    size: 8,
-    alphaMap: [
-        [1,1,1,1,1,1,1,1],
-        [1,0,0,5,0,0,0,1],
-        [1,0,1,1,0,1,0,1],
-        [1,0,1,0,0,1,0,1],
-        [1,0,0,0,1,1,0,1],
-        [1,0,1,0,7,0,0,1],
-        [1,0,0,0,1,0,9,1],
-        [1,1,1,1,1,1,1,1]
-    ],
-    betaMap: [
-        [1,1,1,1,1,1,1,1],
-        [1,0,0,4,0,0,0,1],
-        [1,0,1,1,0,1,0,1],
-        [1,0,1,0,0,1,0,1],
-        [1,0,4,0,1,1,0,1],
-        [1,0,1,0,0,0,0,1],
-        [1,0,0,0,1,0,9,1],
-        [1,1,1,1,1,1,1,1]
-    ]
-};
+const ROOM_DATA = [
+    {
+        title: "ROOM 01: SYNC TEST",
+        size: 8,
+        alphaMap: [
+            [1,1,1,1,1,1,1,1],
+            [1,0,0,5,0,0,0,1],
+            [1,0,1,1,0,1,0,1],
+            [1,0,1,0,0,1,0,1],
+            [1,0,0,0,1,1,0,1],
+            [1,0,1,0,7,0,0,1],
+            [1,0,0,0,1,0,9,1],
+            [1,1,1,1,1,1,1,1]
+        ],
+        betaMap: [
+            [1,1,1,1,1,1,1,1],
+            [1,0,0,4,0,0,0,1],
+            [1,0,1,1,0,1,0,1],
+            [1,0,1,0,0,1,0,1],
+            [1,0,4,0,1,1,0,1],
+            [1,0,1,0,0,0,0,1],
+            [1,0,0,0,1,0,9,1],
+            [1,1,1,1,1,1,1,1]
+        ]
+    },
+    {
+        title: "ROOM 02: DUAL_PARADOX",
+        size: 8,
+        alphaMap: [
+            [1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,9,1],
+            [1,0,1,1,0,1,0,1],
+            [1,0,5,0,0,1,0,1],
+            [1,1,1,0,0,0,0,1],
+            [1,0,7,0,1,1,0,1],
+            [1,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1]
+        ],
+        betaMap: [
+            [1,1,1,1,1,1,1,1],
+            [1,0,1,4,0,0,9,1],
+            [1,0,1,0,1,1,4,1],
+            [1,0,0,5,1,0,0,1],
+            [1,1,0,1,1,0,1,1],
+            [1,0,7,0,1,0,4,1],
+            [1,0,0,0,4,0,0,1],
+            [1,1,1,1,1,1,1,1]
+        ]
+    }
+];
+let currentLevelIndex = 0;
 let alphaPos = {x:1,y:1};
 let betaPos = {x:1,y:1};
 let activeControl = "BOTH";
@@ -37,21 +64,24 @@ const statusEl = document.getElementById("sys-status");
 const desyncEl = document.getElementById("desync-count");
 const debriefModal = document.getElementById("debrief-modal");
 const rebootBtn = document.getElementById("reboot-btn");
+const roomTitleEl = document.getElementById("room-title");
 function renderGrids(){
     gridAlphaEl.innerHTML ="";
     gridBetaEl.innerHTML = "";
-    const alphaOnPlate = ROOM_DATA.alphaMap[alphaPos.y][alphaPos.x] === 5;
-    const betaOnPlate = ROOM_DATA.betaMap[betaPos.y][betaPos.x] === 5;
+    const currentRoom = ROOM_DATA[currentLevelIndex];
+    if (roomTitleEl) roomTitleEl.textContent = currentRoom.title;
+    const alphaOnPlate = currentRoom.alphaMap[alphaPos.y][alphaPos.x] === 5;
+    const betaOnPlate = currentRoom.betaMap[betaPos.y][betaPos.x] === 5;
     const prevUnlocked = exitUnlocked;
     exitUnlocked = alphaOnPlate || betaOnPlate;
     if (!prevUnlocked && exitUnlocked){
         playSound("unlock");
     }
-    for (let y = 0; y<ROOM_DATA.size; y++){
-        for (let x = 0; x < ROOM_DATA.size; x++){
+    for (let y = 0; y<currentRoom.size; y++){
+        for (let x = 0; x < currentRoom.size; x++){
             const cellAlpha = document.createElement("div");
             cellAlpha.classList.add("title");
-            const aVal= ROOM_DATA.alphaMap[y][x];
+            const aVal= currentRoom.alphaMap[y][x];
             if (aVal === 1) cellAlpha.classList.add("wall");
             if (aVal === 5) cellAlpha.classList.add("plate");
             if (aVal === 7) cellAlpha.classList.add("swap");
@@ -63,7 +93,7 @@ function renderGrids(){
             gridAlphaEl.appendChild(cellAlpha);
             const cellBeta = document.createElement("div");
             cellBeta.classList.add("title");
-            const bVal = ROOM_DATA.betaMap[y][x];
+            const bVal = currentRoom.betaMap[y][x];
             if (bVal === 1) cellBeta.classList.add("wall");
             if (bVal === 4) cellBeta.classList.add("hazard");
             if (bVal === 5) cellBeta.classList.add("plate");
@@ -89,14 +119,16 @@ function movePlayer(dx,dy){
         nextBeta.x += dx;
         nextBeta.y += dy;
     }
-    const aTile = ROOM_DATA.alphaMap[nextAlpha.y][nextAlpha.x];
-    const bTile = ROOM_DATA.betaMap[nextBeta.y][nextBeta.x];
+    const currentRoom = ROOM_DATA[currentLevelIndex];
+    const aTile = currentRoom.alphaMap[nextAlpha.y][nextAlpha.x];
+    const bTile = currentRoom.betaMap[nextBeta.y][nextBeta.x];
     if ((activeControl!=="BETA" && aTile ===1)||(activeControl !== "ALPHA" && bTile ===1)){
         playSound("wall");
         triggerDesync("DESYNC: WALL OBSTRUCTION");
         return;
     }
     if (bTile === 4 && (activeControl === "BOTH"||activeControl === "BETA")){
+        playSound("hazard");
         triggerDesync("DESYNC: HAZARD BREACH");
         resetPositions();
         return;
@@ -113,7 +145,6 @@ function movePlayer(dx,dy){
     if ((aTile === 9 || bTile === 9) && exitUnlocked){
         showDebrief();
         playSound("unlock");
-        setTimeout(()=> alert("SECTOR CLEARED: ESCAPE SUCCESSFUL"),50);
     }
 }
 function cycleControlFocus(){
@@ -131,8 +162,14 @@ function resetPositions(fullReset = false){
     alphaPos = {x:1,y:1};
     betaPos = {x:1,y:1};
     activeControl = "BOTH";
-    renderGrids();
+    exitUnlocked = false;
     if (fullReset){
+        if (levelCleared){
+            currentLevelIndex++;
+            if (currentLevelIndex >= ROOM_DATA.length){
+                currentLevelIndex = 0;
+            }
+        }
         moveCount = 0;
         desyncCount = 0;
         startTime = Date.now();
@@ -143,6 +180,7 @@ function resetPositions(fullReset = false){
         const modal = document.getElementById("debrief-modal");
         if (modal) modal.classList.add("hidden");
     }
+    renderGrids();
 }
 window.addEventListener("keydown",(e)=>{
     switch (e.key.toLowerCase()){
