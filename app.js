@@ -58,6 +58,7 @@ let audioCtx = null;
 let moveCount = 0;
 let startTime = Date.now();
 let levelCleared = false;
+let moveHistory = [];
 const gridAlphaEl = document.getElementById("grid-alpha");
 const gridBetaEl = document.getElementById("grid-beta");
 const statusEl = document.getElementById("sys-status");
@@ -137,6 +138,14 @@ function movePlayer(dx,dy){
         resetPositions();
         return;
     }
+    moveHistory.push({
+        alphaPos: {...alphaPos},
+        betaPos: {...betaPos},
+        activeControl: activeControl,
+        exitUnlocked: exitUnlocked,
+        moveCount: moveCount,
+        desyncCount: desyncCount
+    });
     alphaPos = nextAlpha;
     betaPos = nextBeta;
     moveCount++;
@@ -170,6 +179,7 @@ function resetPositions(fullReset = false){
     betaPos = {x:1,y:1};
     activeControl = "BOTH";
     exitUnlocked = false;
+    moveHistory = [];
     if (fullReset){
         moveCount = 0;
         desyncCount = 0;
@@ -189,9 +199,8 @@ window.addEventListener("keydown",(e)=>{
         case "s": case "arrowdown": movePlayer(0,1); break;
         case "a": case "arrowleft": movePlayer(-1,0); break;
         case "d": case "arrowright": movePlayer(1,0); break;
-        case "r":
-            resetPositions();
-            break;
+        case "r": resetPositions(); break;
+        case "z": undoMove(); break;
     }
 });
 function initAudio(){
@@ -281,5 +290,20 @@ if (nextLevelBtn){
 }
 if (replayLevelBtn){
     replayLevelBtn.addEventListener("click", ()=>resetPositions(true));
+}
+function undoMove(){
+    if (levelCleared || moveHistor.length === 0) return;
+    const previousState = moveHistory.pop();
+    alphaPos = previousState.alphaPos;
+    betaPos = previousState.betaPos;
+    activeControl = previousState.activeControl;
+    exitUnlocked = previousState.exitUnlocked;
+    moveCount = previousState.moveCount;
+    desyncCount = previousState.desyncCount;
+    desyncEl.textContent = desyncCount;
+    statusEl.textContent = `MODE: ${activeControl} CONTROL (UNDO)`;
+    statusEl.className = "text-good";
+    playSound("move");
+    renderGrids();
 }
 renderGrids();
