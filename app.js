@@ -65,6 +65,8 @@ const desyncEl = document.getElementById("desync-count");
 const debriefModal = document.getElementById("debrief-modal");
 const rebootBtn = document.getElementById("reboot-btn");
 const roomTitleEl = document.getElementById("room-title");
+const nextLevelBtn = document.getElementById("next-level-btn");
+const replayLevelBtn = document.getElementById("replay-level-btn");
 function renderGrids(){
     gridAlphaEl.innerHTML ="";
     gridBetaEl.innerHTML = "";
@@ -165,12 +167,6 @@ function resetPositions(fullReset = false){
     activeControl = "BOTH";
     exitUnlocked = false;
     if (fullReset){
-        if (levelCleared){
-            currentLevelIndex++;
-            if (currentLevelIndex >= ROOM_DATA.length){
-                currentLevelIndex = 0;
-            }
-        }
         moveCount = 0;
         desyncCount = 0;
         startTime = Date.now();
@@ -269,5 +265,17 @@ if (crtToggleBtn){
         playSound("move");
     });
 }
-document.getElementById("reboot-btn").addEventListener("click",() => resetPositions(true));
+function loadNextLevel(){
+    currentLevelIndex++;
+    if (currentLevelIndex >= ROOM_DATA.length){
+        currentLevelIndex = 0;
+    }
+    resetPositions(true);
+}
+if (nextLevelBtn){
+    nextLevelBtn.addEventListener("click", loadNextLevel);
+}
+if (replayLevelBtn){
+    replayLevelBtn.addEventListener("click", ()=>resetPositions(true));
+}
 renderGrids();
