@@ -30,20 +30,20 @@ const ROOM_DATA = [
             [1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,9,1],
             [1,0,1,1,0,1,0,1],
-            [1,0,5,0,0,1,0,1],
-            [1,1,1,0,0,0,0,1],
-            [1,0,7,0,1,1,0,1],
+            [1,0,7,0,5,1,0,1],
+            [1,1,0,0,0,0,1,1],
             [1,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,0,1],
             [1,1,1,1,1,1,1,1]
         ],
         betaMap: [
             [1,1,1,1,1,1,1,1],
-            [1,0,1,4,0,0,9,1],
-            [1,0,1,0,1,1,4,1],
-            [1,0,0,5,1,0,0,1],
-            [1,1,0,1,1,0,1,1],
-            [1,0,7,0,1,0,4,1],
+            [1,0,0,4,0,0,9,1],
+            [1,0,1,1,0,1,0,1],
+            [1,0,7,4,5,1,0,1],
+            [1,1,0,4,0,0,1,1],
             [1,0,0,0,4,0,0,1],
+            [1,0,1,1,1,1,0,1],
             [1,1,1,1,1,1,1,1]
         ]
     }
@@ -73,7 +73,7 @@ function renderGrids(){
     const alphaOnPlate = currentRoom.alphaMap[alphaPos.y][alphaPos.x] === 5;
     const betaOnPlate = currentRoom.betaMap[betaPos.y][betaPos.x] === 5;
     const prevUnlocked = exitUnlocked;
-    exitUnlocked = alphaOnPlate || betaOnPlate;
+    exitUnlocked = exitUnlocked || alphaOnPlate || betaOnPlate;
     if (!prevUnlocked && exitUnlocked){
         playSound("unlock");
     }
@@ -136,7 +136,7 @@ function movePlayer(dx,dy){
     alphaPos = nextAlpha;
     betaPos = nextBeta;
     moveCount++;
-    if (aTile === 7&&bTile === 7){
+    if (aTile === 7||bTile === 7){
         cycleControlFocus();
         playSound("unlock");
     }
