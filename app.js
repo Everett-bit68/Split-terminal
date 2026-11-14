@@ -115,7 +115,7 @@ function movePlayer(dx,dy){
     let nextBeta = {...betaPos};
     const currentRoom = ROOM_DATA[currentLevelIndex];
     const prevATile = currentRoom.alphaMap[alphaPos.y][alphaPos.x];
-    const prevBTile = currentRoom.alphaMap[betaPos.y][betaPos.x];
+    const prevBTile = currentRoom.betaMap[betaPos.y][betaPos.x];
     playSound("move");
     if (activeControl === "BOTH"|| activeControl === "ALPHA"){
         nextAlpha.x += dx;
@@ -292,7 +292,7 @@ if (replayLevelBtn){
     replayLevelBtn.addEventListener("click", ()=>resetPositions(true));
 }
 function undoMove(){
-    if (levelCleared || moveHistor.length === 0) return;
+    if (levelCleared || moveHistory.length === 0) return;
     const previousState = moveHistory.pop();
     alphaPos = previousState.alphaPos;
     betaPos = previousState.betaPos;
