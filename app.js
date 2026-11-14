@@ -136,8 +136,9 @@ function movePlayer(dx,dy){
     alphaPos = nextAlpha;
     betaPos = nextBeta;
     moveCount++;
-    if (aTile === 7||bTile === 7){
+    if (aTile === 7&&bTile === 7){
         cycleControlFocus();
+        playSound("unlock");
     }
     statusEl.textContent = `MODE: ${activeControl} CONTROL`;
     statusEl.className = "text-good";
@@ -188,12 +189,6 @@ window.addEventListener("keydown",(e)=>{
         case "s": case "arrowdown": movePlayer(0,1); break;
         case "a": case "arrowleft": movePlayer(-1,0); break;
         case "d": case "arrowright": movePlayer(1,0); break;
-        case "tab":
-            e.preventDefault();
-            cycleControlFocus();
-            statusEl.textContent = `MANUAL FOCUS: ${activeControl}`;
-            renderGrids();
-            break;
         case "r":
             resetPositions();
             break;
