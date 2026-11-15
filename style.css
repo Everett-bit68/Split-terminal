@@ -183,10 +183,12 @@ body.crt-disabled .main-header h1,body.crt-disabled .pane-bar,body.crt-disabled 
 .terminal-btn.locked:hover{
     background: var(--alpha-dim); color: var(--alpha-color);
 }
+.pane-alpha .title.laser,
 .pane-beta .title.laser{
     background-color: #38000e; border: 1px solid #ff0055; color: #ff0055;
     animation: laserPulse 0.8s infinite alternate;
 }
+.pane-alpha .title.laser::after,
 .pane-beta .title.laser::after{
     content: "⚡"; font-size: 0.75rem;
 }

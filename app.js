@@ -163,8 +163,8 @@ function movePlayer(dx,dy){
         nextBeta.x += dx;
         nextBeta.y += dy;
     }
-    const aTile = currentRoom.alphaMap[nextAlpha.y][nextAlpha.x];
-    const bTile = currentRoom.betaMap[nextBeta.y][nextBeta.x];
+    let aTile = currentRoom.alphaMap[nextAlpha.y][nextAlpha.x];
+    let bTile = currentRoom.betaMap[nextBeta.y][nextBeta.x];
     if (!lasersActive){
         if (aTile === 3) aTile = 0;
         if (bTile === 3) bTile = 0;
@@ -182,12 +182,6 @@ function movePlayer(dx,dy){
         resetPositions();
         return;
     }
-    if ((bTile === 4 || bTile === 3) && (activeControl === "BOTH"||activeControl === "BETA")){
-        playSound("hazard");
-        triggerDesync("DESYNC: HAZARD BREACH");
-        resetPositions();
-        return;
-    }
     moveHistory.push({
         alphaPos: {...alphaPos},
         betaPos: {...betaPos},
@@ -199,8 +193,8 @@ function movePlayer(dx,dy){
     alphaPos = nextAlpha;
     betaPos = nextBeta;
     moveCount++;
-    const justSteppedOnAlphaSwitch = (currentRoom.alphaMap[alphaPos.y][alphaPos.x]===6);
-    const justSteppedOnBetaSwitch = (currentRoom.betaMap[betaPos.y][betaPos.x]===6);
+    const justSteppedOnAlphaSwitch = (currentRoom.alphaMap[nextAlpha.y][nextAlpha.x]===6);
+    const justSteppedOnBetaSwitch = (currentRoom.betaMap[nextBeta.y][nextBeta.x]===6);
     if (justSteppedOnAlphaSwitch || justSteppedOnBetaSwitch){
         lasersActive = !lasersActive;
         playSound("unlock");
