@@ -83,7 +83,11 @@ let moveCount = 0;
 let startTime = Date.now();
 let levelCleared = false;
 let moveHistory = [];
-let maxUnlockedlevel = parseInt(localStorage.getItem("split-terminal-max"))
+let maxUnlockedlevel = parseInt(localStorage.getItem("split-terminal-max"));
+if (isNaN(maxUnlockedlevel)){
+    maxUnlockedlevel = 0;
+    localStorage.setItem("split-terminal-max",0);
+}
 const gridAlphaEl = document.getElementById("grid-alpha");
 const gridBetaEl = document.getElementById("grid-beta");
 const statusEl = document.getElementById("sys-status");
@@ -96,6 +100,7 @@ const replayLevelBtn = document.getElementById("replay-level-btn");
 const levelSelectBtn = document.getElementById("level-select-btn");
 const closelevelSelectBtn = document.getElementById("close-level-select");
 const levelListContainer = document.getElementById("level-list-container");
+const levelSelectModal = document.getElementById("level-select-modal");
 function renderGrids(){
     gridAlphaEl.innerHTML ="";
     gridBetaEl.innerHTML = "";
@@ -344,12 +349,12 @@ function openLevelSelect(){
             btn.textContent = `[ ${room.title}]`;
             btn.addEventListener("click",()=>{
                 currentLevelIndex = index;
-                levelSelectModal.classlist.add("hidden");
+                levelSelectModal.classList.add("hidden");
                 resetPositions(true);
             });
         } else {
             btn.textContent = `[🔒 ${room.title} (LOCKED) ]`;
-            btn.classlist.add("locked");
+            btn.classList.add("locked");
         }
         levelListContainer.appendChild(btn);
     });
@@ -367,12 +372,15 @@ function loadNextLevel(){
     currentLevelIndex++;
     if (currentLevelIndex >= ROOM_DATA.length){
         currentLevelIndex = 0;
-    } else {
-        if (currentLevelIndex > maxUnlockedlevel){
-            maxUnlockedlevel = currentLevelIndex;
-            localStorage.setItem("split_terminal_max_level" + maxUnlockedlevel);
-        }
+    }
+    if (currentLevelIndex > maxUnlockedlevel){
+        maxUnlockedlevel = currentLevelIndex;
+        localStorage.setItem("split-terminal-max", maxUnlockedlevel);
     }
     resetPositions(true);
+}
+if (nextLevelBtn){
+    nextLevelBtn.replaceWith(nextLevelBtn.cloneNode(true));
+    document.getElementById("next-level-btn").addEventListener("click",loadNextLevel);
 }
 renderGrids();
