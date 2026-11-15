@@ -183,8 +183,19 @@ body.crt-disabled .main-header h1,body.crt-disabled .pane-bar,body.crt-disabled 
 .terminal-btn.locked:hover{
     background: var(--alpha-dim); color: var(--alpha-color);
 }
+.pane-beta .title.laser{
+    background-color: #38000e; border: 1px solid #ff0055; color: #ff0055;
+    animation: laserPulse 0.8s infinite alternate;
+}
+.pane-beta .title-laser::after{
+    content: "⚡";
+}
 @keyframes crtFlicker{
     0%{opacity: 0.96;}
     50%{opacity: 1;}
     100%{opacity: 0.98;}
+}
+@keyframes laserPulse{
+    0% {opacity: 0.6; box-shadow: inset 0 0 4px #ff0055};
+    100%{opacity: 1; box-shadow: 0 0 8px #ff0055};
 }

@@ -62,10 +62,10 @@ const ROOM_DATA = [
         ],
         betaMap: [
             [1,1,1,1,1,1,1,1],
-            [1,0,0,4,0,0,9,1],
-            [1,0,1,1,1,4,1,1],
+            [1,0,0,3,0,0,9,1],
+            [1,0,1,1,1,3,1,1],
             [1,0,7,4,4,0,0,1],
-            [1,1,1,0,1,1,4,1],
+            [1,1,1,0,1,1,3,1],
             [1,0,5,0,4,4,0,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
@@ -131,6 +131,7 @@ function renderGrids(){
             cellBeta.classList.add("title");
             const bVal = currentRoom.betaMap[y][x];
             if (bVal === 1) cellBeta.classList.add("wall");
+            if (bVal === 3) cellBeta.classList.add("laser");
             if (bVal === 4) cellBeta.classList.add("hazard");
             if (bVal === 5) cellBeta.classList.add("plate");
             if (bVal === 7) cellBeta.classList.add("swap");
@@ -165,8 +166,9 @@ function movePlayer(dx,dy){
         triggerDesync("DESYNC: WALL OBSTRUCTION");
         return;
     }
-    if (bTile === 4 && (activeControl === "BOTH"||activeControl === "BETA")){
+    if ((bTile === 4 || bTile === 3) && (activeControl === "BOTH"||activeControl === "BETA")){
         playSound("hazard");
+        triggerDesync("DESYNC: LASER BEAM BREACH");
         triggerDesync("DESYNC: HAZARD BREACH");
         resetPositions();
         return;
