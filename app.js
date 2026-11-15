@@ -169,7 +169,6 @@ function movePlayer(dx,dy){
     if ((bTile === 4 || bTile === 3) && (activeControl === "BOTH"||activeControl === "BETA")){
         playSound("hazard");
         triggerDesync("DESYNC: LASER BEAM BREACH");
-        triggerDesync("DESYNC: HAZARD BREACH");
         resetPositions();
         return;
     }
