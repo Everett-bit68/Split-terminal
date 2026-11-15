@@ -52,11 +52,11 @@ const ROOM_DATA = [
         size: 8,
         alphaMap: [
             [1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,9,1],
-            [1,0,1,1,1,0,1,1],
+            [1,0,0,3,0,0,9,1],
+            [1,0,1,1,1,3,1,1],
             [1,0,7,0,0,0,0,1],
-            [1,1,1,0,1,1,0,1],
-            [1,0,5,0,0,0,0,1],
+            [1,1,1,0,1,1,3,1],
+            [1,0,5,0,0,0,6,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
         ],
@@ -84,6 +84,7 @@ let startTime = Date.now();
 let levelCleared = false;
 let moveHistory = [];
 let maxUnlockedlevel = parseInt(localStorage.getItem("split-terminal-max"));
+let lasersActive = true;
 if (isNaN(maxUnlockedlevel)){
     maxUnlockedlevel = 0;
     localStorage.setItem("split-terminal-max",0);
@@ -119,7 +120,9 @@ function renderGrids(){
             cellAlpha.classList.add("title");
             const aVal= currentRoom.alphaMap[y][x];
             if (aVal === 1) cellAlpha.classList.add("wall");
+            if (aVal === 3 && lasersActive) cellAlpha.classList.add("laser");
             if (aVal === 5) cellAlpha.classList.add("plate");
+            if (aVal === 6) cellAlpha.classList.add("switch");
             if (aVal === 7) cellAlpha.classList.add("swap");
             if (aVal === 9){
                 cellAlpha.classList.add("exit");
@@ -131,9 +134,10 @@ function renderGrids(){
             cellBeta.classList.add("title");
             const bVal = currentRoom.betaMap[y][x];
             if (bVal === 1) cellBeta.classList.add("wall");
-            if (bVal === 3) cellBeta.classList.add("laser");
+            if (bVal === 3 && lasersActive) cellBeta.classList.add("laser");
             if (bVal === 4) cellBeta.classList.add("hazard");
             if (bVal === 5) cellBeta.classList.add("plate");
+            if (bVal === 6) cellBeta.classList.add("switch");
             if (bVal === 7) cellBeta.classList.add("swap");
             if (bVal === 9) {
                 cellBeta.classList.add("exit");
@@ -161,14 +165,26 @@ function movePlayer(dx,dy){
     }
     const aTile = currentRoom.alphaMap[nextAlpha.y][nextAlpha.x];
     const bTile = currentRoom.betaMap[nextBeta.y][nextBeta.x];
+    if (!lasersActive){
+        if (aTile === 3) aTile = 0;
+        if (bTile === 3) bTile = 0;
+    }
     if ((activeControl!=="BETA" && aTile ===1)||(activeControl !== "ALPHA" && bTile ===1)){
         playSound("wall");
         triggerDesync("DESYNC: WALL OBSTRUCTION");
         return;
     }
-    if ((bTile === 4 || bTile === 3) && (activeControl === "BOTH"||activeControl === "BETA")){
+    const alphaHitLaser = (aTile === 3||aTile === 4);
+    const betaHitLaser = (bTile === 3 || bTile === 4);
+    if (((activeControl !== "BETA"&&alphaHitLaser)||(activeControl !=="ALPHA" && betaHitLaser)) && lasersActive){
         playSound("hazard");
         triggerDesync("DESYNC: LASER BEAM BREACH");
+        resetPositions();
+        return;
+    }
+    if ((bTile === 4 || bTile === 3) && (activeControl === "BOTH"||activeControl === "BETA")){
+        playSound("hazard");
+        triggerDesync("DESYNC: HAZARD BREACH");
         resetPositions();
         return;
     }
@@ -183,6 +199,14 @@ function movePlayer(dx,dy){
     alphaPos = nextAlpha;
     betaPos = nextBeta;
     moveCount++;
+    const justSteppedOnAlphaSwitch = (currentRoom.alphaMap[alphaPos.y][alphaPos.x]===6);
+    const justSteppedOnBetaSwitch = (currentRoom.betaMap[betaPos.y][betaPos.x]===6);
+    if (justSteppedOnAlphaSwitch || justSteppedOnBetaSwitch){
+        lasersActive = !lasersActive;
+        playSound("unlock");
+        statusEl.textContent = lasersActive ? "WARNING: LASER GRID ENGAGED":"SYSTEM: LASER GRID DEACTIVATED";
+        statusEl.className = lasersActive ? "text-warn":"text-good";
+    }
     const justSteppedOnAlphaSwap = (prevATile !== 7 && aTile === 7);
     const justSteppedOnBetaSwap = (prevBTile !== 7 && bTile === 7); 
     if (justSteppedOnAlphaSwap || justSteppedOnBetaSwap){
@@ -219,6 +243,7 @@ function resetPositions(fullReset = false){
         desyncCount = 0;
         startTime = Date.now();
         levelCleared = false;
+        lasersActive = true;
         desyncEl.textContent = "0";
         statusEl.textContent = "SYNCHRONIZED";
         statusEl.className= "text-good";

@@ -190,6 +190,12 @@ body.crt-disabled .main-header h1,body.crt-disabled .pane-bar,body.crt-disabled 
 .pane-beta .title.laser::after{
     content: "⚡"; font-size: 0.75rem;
 }
+.title.switch{
+    background-color: #1a1500; border: 1px solid #ffaa00; color: #ffaa00;
+}
+.title.switch::after{
+    content: "⭘"; font-size: 0.85rem;
+}
 @keyframes crtFlicker{
     0%{opacity: 0.96;}
     50%{opacity: 1;}
