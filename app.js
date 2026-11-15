@@ -178,7 +178,7 @@ function movePlayer(dx,dy){
     const alphaHitLaser = (aTile === 3||aTile === 4);
     const betaHitLaser = (bTile === 3 || bTile === 4);
     if (((activeControl !== "BETA"&&alphaHitLaser)||(activeControl !=="ALPHA" && betaHitLaser)) && lasersActive){
-        playSound("hazard");
+        playSound("laser-hit");
         triggerDesync("DESYNC: LASER BEAM BREACH");
         resetPositions();
         return;
@@ -198,7 +198,7 @@ function movePlayer(dx,dy){
     const justSteppedOnBetaSwitch = (currentRoom.betaMap[nextBeta.y][nextBeta.x]===6);
     if (justSteppedOnAlphaSwitch || justSteppedOnBetaSwitch){
         lasersActive = !lasersActive;
-        playSound("unlock");
+        playSound("laser-switch");
         statusEl.textContent = lasersActive ? "WARNING: LASER GRID ENGAGED":"SYSTEM: LASER GRID DEACTIVATED";
         statusEl.className = lasersActive ? "text-warn":"text-good";
     }
@@ -305,6 +305,24 @@ function playSound(type){
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
         osc.start(now);
         osc.stop(now + 0.25);
+    }
+    else if (type === "laser-hit"){
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(800,now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+        gainNode.gain.setValueAtTime(0.15,now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+    }
+    else if (type === "laser-switch"){
+        osc.type = "square";
+        osc.frequency.setValueAtTime(200,now);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+        gainNode.gain.setValueAtTime(0.1,now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
     }
 }
 function showDebrief(){
