@@ -84,6 +84,7 @@ let startTime = Date.now();
 let levelCleared = false;
 let moveHistory = [];
 let maxUnlockedlevel = parseInt(localStorage.getItem("split-terminal-max"));
+let levelBests = JSON.parse(localStorage.getItem("split-terminal-best")) || {};
 let lasersActive = true;
 if (isNaN(maxUnlockedlevel)){
     maxUnlockedlevel = 0;
@@ -315,6 +316,14 @@ function showDebrief(){
     let rank = "S-RANK";
     if (desyncCount > 3) rank = "B-RANK";
     else if (desyncCount > 0 || moveCount > 35) rank = "A-RANK";
+    if (!levelBests[currentLevelIndex]||moveCount < levelBests[currentLevelIndex].moves){
+        levelBests[currentLevelIndex] = {
+            moves: moveCount,
+            rank: rank,
+            desyncs: desyncCount
+        };
+        localStorage.setItem("split-terminal-bests",JSON.stringify(levelBests));
+    }
     document.getElementById("final-moves").textContent = moveCount;
     document.getElementById("final-desyncs").textContent = desyncCount;
     document.getElementById("final-time").textContent = `${mins}:${secs}`;
@@ -366,7 +375,9 @@ function openLevelSelect(){
         btn.className = "terminal-btn";
         const isUnlocked = index <= maxUnlockedlevel;
         if (isUnlocked){
-            btn.textContent = `[ ${room.title}]`;
+            const best = levelBests[index];
+            const recordText = best ? ` - ${best.moves} CYCLES (${best.rank})`: "- NO DATA";
+            btn.textContent = `[ ${room.title}${recordText} ]`;
             btn.addEventListener("click",()=>{
                 currentLevelIndex = index;
                 levelSelectModal.classList.add("hidden");
