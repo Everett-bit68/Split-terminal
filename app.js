@@ -83,6 +83,7 @@ let moveCount = 0;
 let startTime = Date.now();
 let levelCleared = false;
 let moveHistory = [];
+let maxUnlockedlevel = parseInt(localStorage.getItem("split-terminal-max"))
 const gridAlphaEl = document.getElementById("grid-alpha");
 const gridBetaEl = document.getElementById("grid-beta");
 const statusEl = document.getElementById("sys-status");
@@ -92,6 +93,9 @@ const rebootBtn = document.getElementById("reboot-btn");
 const roomTitleEl = document.getElementById("room-title");
 const nextLevelBtn = document.getElementById("next-level-btn");
 const replayLevelBtn = document.getElementById("replay-level-btn");
+const levelSelectBtn = document.getElementById("level-select-btn");
+const closelevelSelectBtn = document.getElementById("close-level-select");
+const levelListContainer = document.getElementById("level-list-container");
 function renderGrids(){
     gridAlphaEl.innerHTML ="";
     gridBetaEl.innerHTML = "";
@@ -329,5 +333,46 @@ function undoMove(){
     statusEl.className = "text-good";
     playSound("move");
     renderGrids();
+}
+function openLevelSelect(){
+    levelListContainer.innerHTML = "";
+    ROOM_DATA.forEach((room, index)=>{
+        const btn = document.createElement("button");
+        btn.className = "terminal-btn";
+        const isUnlocked = index <= maxUnlockedlevel;
+        if (isUnlocked){
+            btn.textContent = `[ ${room.title}]`;
+            btn.addEventListener("click",()=>{
+                currentLevelIndex = index;
+                levelSelectModal.classlist.add("hidden");
+                resetPositions(true);
+            });
+        } else {
+            btn.textContent = `[🔒 ${room.title} (LOCKED) ]`;
+            btn.classlist.add("locked");
+        }
+        levelListContainer.appendChild(btn);
+    });
+    levelSelectModal.classList.remove("hidden");
+}
+if (levelSelectBtn){
+    levelSelectBtn.addEventListener("click", openLevelSelect);
+}
+if (closelevelSelectBtn){
+    closelevelSelectBtn.addEventListener("click",()=>{
+        levelSelectModal.classList.add("hidden");
+    });
+}
+function loadNextLevel(){
+    currentLevelIndex++;
+    if (currentLevelIndex >= ROOM_DATA.length){
+        currentLevelIndex = 0;
+    } else {
+        if (currentLevelIndex > maxUnlockedlevel){
+            maxUnlockedlevel = currentLevelIndex;
+            localStorage.setItem("split_terminal_max_level" + maxUnlockedlevel);
+        }
+    }
+    resetPositions(true);
 }
 renderGrids();

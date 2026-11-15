@@ -12,6 +12,7 @@
         <h1>SPLIT TERMINAL</h1>
         <div class="header-controls">
             <div id="room-title">ROOM 01: SYNC_TEST</div>
+            <button id="level-select-btn" class="crt-toggle-btn">[SECTORS]</button>
             <button id="crt-toggle-btn" class="crt-toggle-btn">[CRT: ON]</button>
         </div>
     </header>
@@ -41,6 +42,19 @@
             <span>RESTART [R]</span>
         </div>
     </footer>
+    <div id="level-select-modal" class="modal-backdrop hidden">
+        <div class="debrief-box">
+            <div class="debrief-header">
+                <span>MISSION DIRECTORY</span>
+                <span class="badge-ok">SELECT SECTOR</span>
+            </div>
+            <h2>UNLOCKED SECTORS</h2>
+            <p class="debrief-sub">Choose a target anomaly zone to initialize</p>
+            <div id="level-list-container">
+            </div>
+            <button id="close-level-select" class="terminal-btn">[CLOSE DIRECTORY]</button>
+        </div>
+    </div>
     <div id="debrief-modal" class="modal-backdrop hidden">
         <div class="debrief-box">
             <div class="debrief-header">
