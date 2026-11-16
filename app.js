@@ -88,9 +88,9 @@ const ROOM_DATA = [
             [1,1,1,1,1,1,1,1],
             [1,0,3,0,1,0,9,1],
             [1,0,3,0,1,0,1,1],
-            [1,0,7,3,3,3,0,1],
+            [1,0,7,2,3,3,0,5],
             [1,1,1,3,1,0,1,1],
-            [1,0,5,0,0,0,6,1],
+            [1,0,5,0,8,0,6,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
         ]
@@ -108,8 +108,15 @@ let startTime = Date.now();
 let levelCleared = false;
 let moveHistory = [];
 let maxUnlockedlevel = parseInt(localStorage.getItem("split-terminal-max"));
-let levelBests = JSON.parse(localStorage.getItem("split-terminal-best")) || {};
+let levelBests = JSON.parse(localStorage.getItem("split-terminal-bests")) || {};
 let lasersActive = true;
+let activeAlphaMap = [];
+let activeBetaMap = [];
+function loadCurrentRoom(){
+    const room = ROOM_DATA[currentLevelIndex];
+    activeAlphaMap = room.alphaMap.map(row => [...row]);
+    activeBetaMap = room.betaMap.map(row => [...row]);
+}
 if (isNaN(maxUnlockedlevel)){
     maxUnlockedlevel = 0;
     localStorage.setItem("split-terminal-max",0);
@@ -132,19 +139,13 @@ function renderGrids(){
     gridBetaEl.innerHTML = "";
     const currentRoom = ROOM_DATA[currentLevelIndex];
     if (roomTitleEl) roomTitleEl.textContent = currentRoom.title;
-    const alphaOnPlate = currentRoom.alphaMap[alphaPos.y][alphaPos.x] === 5;
-    const betaOnPlate = currentRoom.betaMap[betaPos.y][betaPos.x] === 5;
-    const prevUnlocked = exitUnlocked;
-    exitUnlocked = exitUnlocked || alphaOnPlate || betaOnPlate;
-    if (!prevUnlocked && exitUnlocked){
-        playSound("unlock");
-    }
     for (let y = 0; y<currentRoom.size; y++){
         for (let x = 0; x < currentRoom.size; x++){
             const cellAlpha = document.createElement("div");
             cellAlpha.classList.add("title");
             const aVal= currentRoom.alphaMap[y][x];
             if (aVal === 1) cellAlpha.classList.add("wall");
+            if (aVal === 2) cellAlpha.classList.add("box");
             if (aVal === 3 && lasersActive) cellAlpha.classList.add("laser");
             if (aVal === 5) cellAlpha.classList.add("plate");
             if (aVal === 6) cellAlpha.classList.add("switch");
@@ -159,11 +160,20 @@ function renderGrids(){
             cellBeta.classList.add("title");
             const bVal = currentRoom.betaMap[y][x];
             if (bVal === 1) cellBeta.classList.add("wall");
+            if (bVal === 2) cellBeta.classList.add("box");
             if (bVal === 3 && lasersActive) cellBeta.classList.add("laser");
             if (bVal === 4) cellBeta.classList.add("hazard");
             if (bVal === 5) cellBeta.classList.add("plate");
             if (bVal === 6) cellBeta.classList.add("switch");
             if (bVal === 7) cellBeta.classList.add("swap");
+            if (bVal === 8) {
+                const isGateOpen = (alphaPos.x === 7 && alphaPos.y === 3)|| (betaPos.x === 7 && betaPos === 3)|| activeAlphaMap[3][7] === 2 || activeBetaMap[3][7] === 2;
+                if (isGateOpen){
+                    cellBeta.classList.add("gate-open");
+                } else {
+                    cellBeta.classList.add("wall");
+                }
+            }
             if (bVal === 9) {
                 cellBeta.classList.add("exit");
                 if (exitUnlocked) cellBeta.classList.add("unlocked");
@@ -190,10 +200,44 @@ function movePlayer(dx,dy){
     }
     let aTile = currentRoom.alphaMap[nextAlpha.y][nextAlpha.x];
     let bTile = currentRoom.betaMap[nextBeta.y][nextBeta.x];
+    if (aTile === 2 &&(activeControl === "BOTH" || activeControl === "ALPHA")){
+        let boxNextX = nextAlpha.x + dx;
+        let boxNextY = nextAlpha.y + dy;
+        let targetTile = activeAlphaMap[boxNextY][boxNextX];
+        if (targetTile === 0 || targetTile === 5){
+            activeAlphaMap[boxNextY][boxNextX] = 2;
+            activeAlphaMap[nextAlpha.y][nextAlpha.x] = 0;
+            aTile = 0;
+        } else {
+            playSound("wall");
+            triggerDesync("DESYNC: BLOCK DESTRUCTION");
+            return;
+        }
+    }
+    if (bTile === 2 && (activeControl === "BOTH" || activeControl === "BETA")){
+        let boxNextX = nextBeta.x + dx;
+        let boxNextY = nextBeta.y + dy;
+        let targetTile = activeBetaMap[boxNextY][boxNextX];
+        if (targetTile === 0 || targetTile === 5){
+            activeBetaMap[boxNextY][boxNextX] = 2;
+            activeBetaMap[nextBeta.y][nextBeta.x] = 0;
+            bTile = 0;
+        } else {
+            playSound("wall");
+            triggerDesync("DESYNC: BLOCK DESTRUCTION");
+            return;
+        }
+    }
+    const topPlateCovered = (alphaPos.x === 7 && alphaPos.y === 3) || (betaPos.x === 7 && betaPos.y === 3) || activeAlphaMap[3][7] === 2 || activeBetaMap[3][7] === 2;
+    let gateOpen = topPlateCovered;
     if (!lasersActive){
         if (aTile === 3) aTile = 0;
         if (bTile === 3) bTile = 0;
     }
+    let effectiveATile = aTile;
+    let effectiveBTile = bTile;
+    if (effectiveATile === 8 && !gateOpen) effectiveATile = 1;
+    if (effectiveBTile === 8 && !gateOpen) effectiveBTile = 1;
     if ((activeControl!=="BETA" && aTile ===1)||(activeControl !== "ALPHA" && bTile ===1)){
         playSound("wall");
         triggerDesync("DESYNC: WALL OBSTRUCTION");
@@ -210,6 +254,8 @@ function movePlayer(dx,dy){
     moveHistory.push({
         alphaPos: {...alphaPos},
         betaPos: {...betaPos},
+        alphaMapCopy: activeAlphaMap.map(row => [...row]),
+        betaMapCopy: activeBetaMap.map(row => [...row]),
         activeControl: activeControl,
         exitUnlocked: exitUnlocked,
         moveCount: moveCount,
@@ -232,10 +278,16 @@ function movePlayer(dx,dy){
         cycleControlFocus();
         playSound("unlock");
     }
+    const bottomPlateCovered = (alphaPos.x === 2 && alphaPos.y === 5) || (betaPos.x === 2 && betaPos.y === 5) || activeAlphaMap[5][2] === 2 || activeBetaMap [5][2] === 2;
+    const prevUnlocked = exitUnlocked;
+    exitUnlocked = exitUnlocked || bottomPlateCovered;
+    if (!prevUnlocked && exitUnlocked){
+        playSound("unlock");
+    }
     statusEl.textContent = `MODE: ${activeControl} CONTROL`;
     statusEl.className = "text-good";
     renderGrids();
-    if ((aTile === 9 || bTile === 9) && exitUnlocked){
+    if ((activeAlphaMap[alphaPos.y][alphaPos.x] === 9 || activeBetaMap[betaPos.y][betaPos.x] === 9)&& exitUnlocked){
         showDebrief();
         playSound("unlock");
     }
@@ -400,6 +452,8 @@ function undoMove(){
     const previousState = moveHistory.pop();
     alphaPos = previousState.alphaPos;
     betaPos = previousState.betaPos;
+    activeAlphaMap = previousState.alphaMapCopy;
+    activeBetaMap = previousState.betaMapCopy;
     activeControl = previousState.activeControl;
     exitUnlocked = previousState.exitUnlocked;
     moveCount = previousState.moveCount;
@@ -456,4 +510,5 @@ if (nextLevelBtn){
     nextLevelBtn.replaceWith(nextLevelBtn.cloneNode(true));
     document.getElementById("next-level-btn").addEventListener("click",loadNextLevel);
 }
+loadCurrentRoom();
 renderGrids();
