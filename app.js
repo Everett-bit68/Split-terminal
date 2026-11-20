@@ -4,7 +4,7 @@ const ROOM_DATA = [
         size: 8,
         alphaMap: [
             [1,1,1,1,1,1,1,1],
-            [1,0,0,5,0,0,0,1],
+            [1,0,0,10,0,0,0,1],
             [1,0,1,1,0,1,0,1],
             [1,0,1,0,0,1,0,1],
             [1,0,0,0,1,1,0,1],
@@ -30,7 +30,7 @@ const ROOM_DATA = [
             [1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,9,1],
             [1,0,1,1,0,1,0,1],
-            [1,0,7,0,5,1,0,1],
+            [1,0,7,0,10,1,0,1],
             [1,1,0,0,0,0,1,1],
             [1,0,0,0,0,0,0,1],
             [1,0,1,1,1,1,0,1],
@@ -40,7 +40,7 @@ const ROOM_DATA = [
             [1,1,1,1,1,1,1,1],
             [1,0,0,4,0,0,9,1],
             [1,0,1,1,0,1,0,1],
-            [1,0,7,4,5,1,0,1],
+            [1,0,7,4,10,1,0,1],
             [1,1,0,4,0,0,1,1],
             [1,0,0,0,4,0,0,1],
             [1,0,1,1,1,1,0,1],
@@ -56,7 +56,7 @@ const ROOM_DATA = [
             [1,0,1,1,1,3,1,1],
             [1,0,7,0,0,0,0,1],
             [1,1,1,0,1,1,3,1],
-            [1,0,5,0,0,0,6,1],
+            [1,0,10,0,0,0,6,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
         ],
@@ -66,7 +66,7 @@ const ROOM_DATA = [
             [1,0,1,1,1,3,1,1],
             [1,0,7,4,4,0,0,1],
             [1,1,1,0,1,1,3,1],
-            [1,0,5,0,4,4,0,1],
+            [1,0,10,0,4,4,0,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
         ]
@@ -80,7 +80,7 @@ const ROOM_DATA = [
             [1,0,0,0,1,0,1,1],
             [1,0,0,0,0,0,0,1],
             [1,1,1,1,1,0,1,1],
-            [1,0,5,0,8,0,6,1],
+            [1,0,10,0,8,0,6,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
         ],
@@ -90,7 +90,7 @@ const ROOM_DATA = [
             [1,0,3,3,1,0,1,1],
             [1,0,3,2,3,3,0,5],
             [1,1,1,1,1,0,1,1],
-            [1,0,5,0,8,0,6,1],
+            [1,0,10,0,8,0,6,1],
             [1,0,0,0,1,1,1,1],
             [1,1,1,1,1,1,1,1]
         ]
@@ -147,12 +147,11 @@ function renderGrids(){
             if (aVal === 1) cellAlpha.classList.add("wall");
             if (aVal === 2) cellAlpha.classList.add("box");
             if (aVal === 3 && lasersActive) cellAlpha.classList.add("laser");
-            if (aVal === 5) cellAlpha.classList.add("plate");
+            if (aVal === 5 || aVal === 10) cellAlpha.classList.add("plate");
             if (aVal === 6) cellAlpha.classList.add("switch");
             if (aVal === 7) cellAlpha.classList.add("swap");
             if (aVal === 8){
-                const topPlateCovered = (alphaPos.x === 7 && alphaPos.y === 3)||(betaPos.x === 7 && betaPos.y === 3)|| activeAlphaMap[3][7] === 2 || activeBetaMap[3][7] === 2;
-                if (topPlateCovered){
+                if (areAnyPlatesPressed()){
                     cellAlpha.classList.add("gate-open");
                 } else {
                     cellAlpha.classList.add("wall");
@@ -171,12 +170,11 @@ function renderGrids(){
             if (bVal === 2) cellBeta.classList.add("box");
             if (bVal === 3 && lasersActive) cellBeta.classList.add("laser");
             if (bVal === 4) cellBeta.classList.add("hazard");
-            if (bVal === 5) cellBeta.classList.add("plate");
+            if (bVal === 5 || bVal === 10) cellBeta.classList.add("plate");
             if (bVal === 6) cellBeta.classList.add("switch");
             if (bVal === 7) cellBeta.classList.add("swap");
             if (bVal === 8) {
-                const isGateOpen = (alphaPos.x === 7 && alphaPos.y === 3)|| (betaPos.x === 7 && betaPos.y === 3)|| activeAlphaMap[3][7] === 2 || activeBetaMap[3][7] === 2;
-                if (isGateOpen){
+                if (areAnyPlatesPressed()){
                     cellBeta.classList.add("gate-open");
                 } else {
                     cellBeta.classList.add("wall");
@@ -217,7 +215,7 @@ function movePlayer(dx,dy){
         let boxNextY = nextAlpha.y + dy;
         let targetTile = activeAlphaMap[boxNextY][boxNextX];
         if (targetTile === 3 && !lasersActive) targetTile = 0;
-        if (targetTile === 0 || targetTile === 5){
+        if (targetTile === 0 || targetTile === 5 || targetTile === 10){
             activeAlphaMap[boxNextY][boxNextX] = 2;
             activeAlphaMap[nextAlpha.y][nextAlpha.x] = 0;
             aTile = 0;
@@ -232,7 +230,7 @@ function movePlayer(dx,dy){
         let boxNextY = nextBeta.y + dy;
         let targetTile = activeBetaMap[boxNextY][boxNextX];
         if (targetTile === 3 && !lasersActive) targetTile = 0;
-        if (targetTile === 0 || targetTile === 5){
+        if (targetTile === 0 || targetTile === 5 || targetTile === 10){
             activeBetaMap[boxNextY][boxNextX] = 2;
             activeBetaMap[nextBeta.y][nextBeta.x] = 0;
             bTile = 0;
@@ -242,8 +240,7 @@ function movePlayer(dx,dy){
             return;
         }
     }
-    const topPlateCovered = (alphaPos.x === 7 && alphaPos.y === 3) || (betaPos.x === 7 && betaPos.y === 3) || activeAlphaMap[3][7] === 2 || activeBetaMap[3][7] === 2;
-    let gateOpen = topPlateCovered;
+    const gateOpen = areAnyPlatesPressed();
     if (!lasersActive){
         if (aTile === 3) aTile = 0;
         if (bTile === 3) bTile = 0;
@@ -292,9 +289,8 @@ function movePlayer(dx,dy){
         cycleControlFocus();
         playSound("unlock");
     }
-    const bottomPlateCovered = (alphaPos.x === 2 && alphaPos.y === 5) || (betaPos.x === 2 && betaPos.y === 5) || activeAlphaMap[5][2] === 2 || activeBetaMap [5][2] === 2;
     const prevUnlocked = exitUnlocked;
-    exitUnlocked = exitUnlocked || bottomPlateCovered;
+    exitUnlocked = exitUnlocked || isExitPlatePressed();
     if (!prevUnlocked && exitUnlocked){
         playSound("unlock");
     }
@@ -524,6 +520,40 @@ function loadNextLevel(){
 if (nextLevelBtn){
     nextLevelBtn.replaceWith(nextLevelBtn.cloneNode(true));
     document.getElementById("next-level-btn").addEventListener("click",loadNextLevel);
+}
+function areAnyPlatesPressed(){
+    const room = ROOM_DATA[currentLevelIndex];
+    for (let y = 0; y<room.size;y++){
+        for (let x=0; x<room.size; x++){
+            const hasAlphaPlate = room.alphaMap[y][x] === 5;
+            const hasBetaPlate = room.betaMap[y][x] === 5;
+            if (hasAlphaPlate || hasBetaPlate){
+                const coveredByPlayer = (alphaPos.x === x && alphaPos.y === y) || (betaPos.x ===x && betaPos.y === y);
+                const coveredByBox = activeAlphaMap[y][x]===2||activeBetaMap[y][x]===2;
+                if (coveredByPlayer || coveredByBox){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+function isExitPlatePressed(){
+    const room = ROOM_DATA[currentLevelIndex];
+    for (let y=0; y<room.size; y++){
+        for (let x = 0; x<room.size; x++){
+            const hasAlphaExitPlate = room.alphaMap[y][x] === 10;
+            const hasBetaExitPlate = room.betaMap[y][x] === 10;
+            if (hasAlphaExitPlate||hasBetaExitPlate){
+                const coveredByPlayer = (alphaPos.x === x&&alphaPos.y === y) || (betaPos.x === x && betaPos.y === y);
+                const coveredByBox = activeAlphaMap[y][x] === 2 || activeBetaMap[y][x] === 2;
+                if (coveredByPlayer || coveredByBox){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 loadCurrentRoom();
 renderGrids();
